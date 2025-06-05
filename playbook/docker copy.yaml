@@ -1,0 +1,51 @@
+- name: Install Docker and Docker Compose on Ubuntu 22.04
+  hosts: deployment-vm
+  become: true
+
+  tasks:
+    - name: Install basic dependencies
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg-agent
+          - software-properties-common
+        state: present
+        update_cache: true
+
+    - name: Install Docker using official script
+      shell: curl -fsSL https://get.docker.com | sh
+      args:
+        executable: /bin/bash
+
+    - name: Ensure Docker service is enabled and started
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Ensure 'docker' group exists
+      group:
+        name: docker
+        state: present
+
+    - name: Add 'azureuser' to 'docker' group
+      user:
+        name: azureuser
+        groups: docker
+        append: yes
+
+    - name: Download docker-compose binary
+      get_url:
+        url: https://github.com/docker/compose/releases/download/1.29.2/docker-compose-Linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+
+    - name: Ensure docker-compose is executable
+      file:
+        path: /usr/local/bin/docker-compose
+        owner: root
+        group: root
+        mode: '0755'
+        state: file
