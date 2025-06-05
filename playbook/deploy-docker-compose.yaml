@@ -1,0 +1,26 @@
+---
+- name: Deploy with docker compose 
+- hosts: deployment-vm
+  become: true
+  tasks:
+    - name: Ensure Docker Compose directory exists
+      file:
+        path: /opt/app
+        state: directory
+
+    - name: Generate docker-compose.yml from template
+      template:
+        src: ../templates/docker-compose.j2
+        dest: /opt/app/docker-compose.yml
+        mode: '0644'
+    
+    - name: Pull backend image
+      shell: docker pull {{ backend_image }}
+
+    - name: Pull frontend image
+      shell: docker pull {{ frontend_image }}
+
+    - name: Run docker-compose up
+      shell: docker-compose up -d --remove-orphans
+      args:
+        chdir: /opt/app

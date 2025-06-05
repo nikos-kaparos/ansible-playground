@@ -1,0 +1,6 @@
+---
+azure-hosts:
+  hosts:
+    deployment-vm:
+      ansible_host: deployment
+      

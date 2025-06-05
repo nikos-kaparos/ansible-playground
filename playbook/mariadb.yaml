@@ -1,0 +1,36 @@
+---
+
+- name: install mariadb
+  hosts: mariadb_local_vm
+  become: yes
+  become_user: root
+
+  tasks:
+    - name: install mariadb packages
+      apt:
+        name: mariadb-server
+        state: present
+        update_cache: yes
+
+    - name: install pip package
+      apt:
+        name: python3-pip
+        state: present
+        update_cache: yes
+
+    - name: install PyMySQL package
+      pip:
+        name: pymysql
+      become: yes 
+      become_user: root
+
+
+    - name: create database user
+      community.mysql.mysql_user:
+        name: nikos
+        password: 1234
+        priv: '*.*:ALL' # Δίνει πλήρη δικαιώματα σε όλες τις βάσεις δεδομένων
+        state: present  # Βεβαιώνεται ότι ο χρήστης υπάρχει (αν δεν υπάρχει, τον δημιουργεί)
+        login_unix_socket: /run/mysqld/mysqld.sock
+
+

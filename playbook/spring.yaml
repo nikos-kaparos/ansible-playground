@@ -1,0 +1,37 @@
+---
+- name: install spring boot application
+  hosts: all
+  vars:
+    app_dir: "{{ ansible_env.HOME }}/ds-lab-2024"
+
+  tasks:
+    - name: show app dir value
+      ansible.builtin.debug:
+        
+    - name: install java
+      apt:
+        name: openjdk-21-jdk
+        state: present
+        update_cache: yes
+      become: yes
+    
+    - name: "debug appdir"
+      ansible.builtin.debug:
+        msg: "appdir {{ansible_user_dir}}"
+
+    - name: clone git repo
+      git:
+        repo: 'https://github.com/tsadimasteaching/ds-lab-2024.git'
+        dest: "{{ app_dir }}"
+        version: api
+        force: yes # clone and ignore git status
+
+    - name: "Populate application.properties"
+      lineinfile:
+        dest: "{{ appdir }}/src/main/resources/application.properties"
+        state: present
+        regexp: "^{{item.key}}="
+        line: "{{item.key}}={{item.value}}"
+      with_items:
+        - "{{app.env | dict2items}}"
+

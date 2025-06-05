@@ -1,0 +1,13 @@
+---
+- name: git clone project
+  hosts: devops-vm-1    
+  become: yes
+  become_user: root
+    
+  tasks:
+    - name: clone github repository
+      git:
+        repo: https://github.com/nikos-kaparos/Crowdfunding.git
+        dest: /home/azureuser/app
+        clone: yes
+        update: yes
