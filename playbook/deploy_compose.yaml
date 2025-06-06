@@ -15,7 +15,11 @@
         mode: '0644'
     
     - name: Docker Login to GHCR
-      shell: echo "{{ github_token }}" | docker login ghcr.io -u "{{ github_user }}" --password-stdin
+      shell: echo "$GITHUB_TOKEN" | docker login ghcr.io -u "{{ github_user }}" --password-stdin
+      no_log: true
+      environment:
+        GITHUB_TOKEN: "{{ lookup('env','GITHUB_TOKEN') }}"
+
 
     - name: Pull backend image
       shell: docker pull {{ backend_image }}
