@@ -14,6 +14,9 @@
         dest: /opt/app/docker-compose.yml
         mode: '0644'
     
+    - name: Docker Login to GHCR
+      shell: echo "{{ github_token }}" | docker login ghcr.io -u "{{ github_user }}" --password-stdin
+
     - name: Pull backend image
       shell: docker pull {{ backend_image }}
 
