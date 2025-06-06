@@ -1,6 +1,6 @@
 ---
 - name: Deploy with docker compose 
-- hosts: deployment-vm
+  hosts: deployment-vm
   become: true
   tasks:
     - name: Ensure Docker Compose directory exists
