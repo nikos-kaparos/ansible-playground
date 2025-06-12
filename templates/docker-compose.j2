@@ -2,7 +2,7 @@ version: '3.8'
 services:
   app:
     image: {{ backend_image }}
-    container_name: spring_app
+    container_name: spring
     ports:
       - "8080:8080"
     depends_on:
