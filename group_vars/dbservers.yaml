@@ -1,0 +1,4 @@
+db:
+  name: "mydatabase"
+  user: "myuser"
+  password: "mypassword"

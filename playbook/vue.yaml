@@ -1,0 +1,141 @@
+---
+- hosts: frontend
+
+  vars:
+      frontendappdir: "{{ ansible_user_dir }}/frontend/frontend"
+      branch: "main"
+      site_location: /var/www/vue
+      VUE_APP_API_URL: http://{{ ip_response.content | trim }}:8080
+      VUE_APP_PORT: 3000
+      VUE_APP_FEATURE_FLAG: true      
+
+  pre_tasks:
+
+    - name: find my public ip
+      uri:
+        url: http://ifconfig.me/ip
+        return_content: yes
+      register: ip_response
+
+    - name: see public ip
+      debug:
+        var: ip_response.content
+
+    - name: install Nginx
+      package:
+        name: nginx
+        state: latest
+      become: yes
+
+    - name: install nvm
+      shell: |
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+      args:
+        executable: /bin/bash
+        chdir: "$HOME"
+        creates: "$HOME/.nvm/nvm.sh"
+
+    - name: setup .profile
+      ansible.builtin.lineinfile:
+        path: ~/.profile
+        line: source ~/.nvm/nvm.sh # This will make sure Node is on the user's PATH
+        create: yes
+
+    - name: "debug"
+      ansible.builtin.debug:
+        msg: "PATH : {{ ansible_env.PATH }}"
+      
+    - name: install node
+      shell: |
+        source $HOME/.nvm/nvm.sh && nvm install 20.12.1
+      args:
+        executable: /bin/bash
+        chdir: "$HOME"
+        creates: "$HOME/.nvm/versions/node/v20.12.1"
+  
+    - name: install Git
+      package:
+        name: git
+        state: latest
+      become: yes
+
+  tasks:
+    - name: clone the Vue repository
+      git:
+          repo: "https://github.com/nikos-kaparos/Crowdfunding.git"
+          dest: "{{ ansible_user_dir }}/frontend"
+          version: "frontend"
+          force: yes
+
+    - name: create .env file from vue env vars
+      copy:
+        dest: "{{ frontendappdir }}/.env"
+        content: |
+          VUE_APP_API_URL={{ VUE_APP_API_URL }}
+          VUE_APP_PORT={{ VUE_APP_PORT }}
+          VUE_APP_FEATURE_FLAG={{ VUE_APP_FEATURE_FLAG }}
+        owner: azureuser
+        group: azureuser
+        mode: '0644'
+
+    - name: install dependencies
+      shell: |
+        export PATH=$PATH:~/.nvm/versions/node/v20.12.1/bin; npm install
+      args:
+        chdir: "{{ frontendappdir }}"
+
+    - name: build Vue.js app
+      shell: |
+        export PATH=$PATH:~/.nvm/versions/node/v20.12.1/bin; npm run build
+      args:
+        chdir: "{{ frontendappdir }}"
+
+    - name: copy dist in nginx location 
+      copy:
+        src: "{{ frontendappdir }}/dist/"
+        dest: "{{ site_location }}"
+        remote_src: True
+        mode: "0755"
+        force: true
+      notify: restart nginx
+      become: yes
+
+    - name: Set ownership for Vue app files
+      file:
+        path: "{{ site_location }}"
+        owner: www-data
+        group: www-data
+        recurse: yes
+      become: yes
+
+    - name: copy nginx conf file
+      template:
+        src: ../files/nginx.vue.j2
+        dest: "/etc/nginx/sites-available/vue"
+      become: yes
+
+    - name: enable vue site in nginx
+      file:
+        src: "/etc/nginx/sites-available/vue"
+        dest: "/etc/nginx/sites-enabled/vue"
+        state: link
+      become: yes
+    
+
+    - name: de-activate default nginx site
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      become: yes
+      notify: restart nginx
+    
+    - name: print application URL
+      debug:
+        msg: "App is deployed at: http://{{ ip_response.content | trim }}"    
+
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted
+      become: yes
