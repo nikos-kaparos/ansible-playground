@@ -1,0 +1,19 @@
+appuser: azureuser
+appgroup: azureuser
+appdir: "{{ ansible_user_dir }}/spring"
+branch: backend
+app_port: 8080
+backend_server_url: "http://135.116.57.195:8080"
+
+app:
+  env:
+    server.port: "{{ app_port }}"
+    spring.datasource.username: myuser
+    spring.datasource.password: mypassword
+    spring.datasource.url: "jdbc:postgresql://135.225.113.85:5432/mydatabase"
+
+service:
+  workingdir: "{{ appdir }}/backend"
+  execstart: "java -jar {{ appdir }}/backend/target/SpirngSecEx-0.0.1-SNAPSHOT.jar"
+  environment:
+    HOME: "{{ ansible_user_dir }}"  
