@@ -4,3 +4,17 @@ azure-hosts:
     deployment-vm:
       ansible_host: deployment
       
+azurehosts:
+  hosts:
+    dev-vm-1:
+      ansible_host: 135.116.57.195
+      ansible_user: azureuser
+    frontend:
+      ansible_host: 4.223.160.109
+      ansible_user: azureuser
+      
+dbservers:
+  hosts:
+    postgres:
+      ansible_host: 135.225.113.85 
+      ansible_user: azureuser  
