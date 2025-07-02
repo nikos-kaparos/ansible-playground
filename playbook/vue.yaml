@@ -64,7 +64,7 @@
       git:
           repo: "https://github.com/nikos-kaparos/Crowdfunding.git"
           dest: "{{ ansible_user_dir }}/frontend"
-          version: "frontend"
+          version: "{{ branch }}"
           force: yes
 
     - name: create .env file from vue env vars
