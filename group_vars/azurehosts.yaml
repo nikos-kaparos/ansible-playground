@@ -1,7 +1,7 @@
 appuser: azureuser
 appgroup: azureuser
 appdir: "{{ ansible_user_dir }}/spring"
-branch: backend
+branch: main
 app_port: 8080
 backend_server_url: "http://135.116.57.195:8080"
 
