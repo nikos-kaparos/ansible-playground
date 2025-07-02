@@ -5,7 +5,7 @@
       frontendappdir: "{{ ansible_user_dir }}/frontend/frontend"
       branch: "main"
       site_location: /var/www/vue
-      VUE_APP_API_URL: 135.116.57.195:8080
+      VUE_APP_API_URL: http://135.116.57.195:8080
       VUE_APP_PORT: 3000
       VUE_APP_FEATURE_FLAG: true      
 
