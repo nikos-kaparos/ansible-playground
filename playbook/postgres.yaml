@@ -1,6 +1,6 @@
 ---
 - name: install postgres package
-  hosts: dbservers
+  hosts: db
   become: yes
   become_user: root
 
