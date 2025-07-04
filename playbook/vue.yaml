@@ -1,10 +1,12 @@
 ---
-- hosts: vue
+#- hosts: vue
+- hosts: frontend 
 
   vars:
       frontendappdir: "{{ ansible_user_dir }}/frontend/frontend"
       branch: "main"
       site_location: /var/www/vue
+      VUE_APP_BACKEND_URL: "{{ backend_server_url }}"
       VUE_APP_API_URL: /api
       VUE_APP_PORT: 3000
       VUE_APP_FEATURE_FLAG: true      
@@ -52,17 +54,43 @@
         executable: /bin/bash
         chdir: "$HOME"
         creates: "$HOME/.nvm/versions/node/v20.12.1"
-  
+
     - name: install Git
       package:
         name: git
         state: latest
       become: yes
 
+    - name: Remove existing Vue app files from /var/www/vue
+      file:
+        path: "/var/www/vue"
+        state: absent
+      become: yes
+
+    - name: Remove old dist folder before building
+      file:
+        path: "{{ frontendappdir }}/dist"
+        state: absent
+      become: yes
+
+    - name: Remove old frontend repo folder before cloning
+      file:
+        path: "{{ ansible_user_dir }}/frontend"
+        state: absent
+      become: yes
+
+    - name: Remove old Nginx conf file if it exists
+      file:
+        path: "/etc/nginx/sites-available/vue"
+        state: absent
+      become: yes      
+
   tasks:
+
     - name: clone the Vue repository
       git:
-          repo: "https://github.com/nikos-kaparos/Crowdfunding.git"
+          #repo: "https://github.com/nikos-kaparos/Crowdfunding.git"
+          repo: "https://github.com/mariatsarouche/Crowdfunding.git"       
           dest: "{{ ansible_user_dir }}/frontend"
           version: "{{ branch }}"
           force: yes
@@ -72,6 +100,7 @@
         dest: "{{ frontendappdir }}/.env"
         content: |
           VUE_APP_API_URL={{ VUE_APP_API_URL }}
+          VUE_APP_BACKEND_URL={{ VUE_APP_BACKEND_URL }}
           VUE_APP_PORT={{ VUE_APP_PORT }}
           VUE_APP_FEATURE_FLAG={{ VUE_APP_FEATURE_FLAG }}
         owner: azureuser

@@ -1,6 +1,7 @@
 ---
 - name: install spring boot application
-  hosts: spring
+  #hosts: spring
+  hosts: dev-vm-1
 
   pre_tasks:
     - name: install java
@@ -15,10 +16,17 @@
     - name: "debug appdir"
       ansible.builtin.debug:
         msg: "appdir {{ ansible_user_dir }}" 
-        
+
+    - name: Remove old backend repo folder before cloning
+      file:
+        path: "{{ ansible_user_dir }}/spring"
+        state: absent
+      become: yes 
+
     - name: clone git repo
       git:
-        repo: 'https://github.com/nikos-kaparos/Crowdfunding.git'
+        #repo: 'https://github.com/nikos-kaparos/Crowdfunding.git'
+        repo: 'https://github.com/mariatsarouche/Crowdfunding.git'
         dest: "{{ appdir }}"
         version: "{{ branch }}"
         force: yes  
