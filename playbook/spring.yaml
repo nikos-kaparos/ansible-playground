@@ -1,7 +1,7 @@
 ---
 - name: install spring boot application
-  #hosts: spring
-  hosts: dev-vm-1
+  hosts: spring
+  
 
   pre_tasks:
     - name: install java

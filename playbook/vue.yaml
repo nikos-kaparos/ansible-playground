@@ -1,6 +1,5 @@
 ---
-#- hosts: vue
-- hosts: frontend 
+- hosts: vue
 
   vars:
       frontendappdir: "{{ ansible_user_dir }}/frontend/frontend"
